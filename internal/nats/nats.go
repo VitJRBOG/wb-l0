@@ -1,12 +1,15 @@
 package nats
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
 	"wb-l0/config"
+	"wb-l0/internal/models"
 
 	"github.com/nats-io/stan.go"
+	"gorm.io/gorm"
 )
 
 func Connect(cfg *config.NatsConfig) stan.Conn {
@@ -22,7 +25,8 @@ func Connect(cfg *config.NatsConfig) stan.Conn {
 	return sc
 }
 
-func Subcribe(sc stan.Conn, msgChannel chan []byte) stan.Subscription {
+func Subcribe(sc stan.Conn, dbConnection *gorm.DB) stan.Subscription {
+	msgChannel := make(chan []byte)
 	sub, err := sc.Subscribe("foo", func(m *stan.Msg) {
 		msgChannel <- m.Data
 	}, stan.StartWithLastReceived())
@@ -31,5 +35,19 @@ func Subcribe(sc stan.Conn, msgChannel chan []byte) stan.Subscription {
 		os.Exit(1)
 	}
 
+	go parseReceivedData(dbConnection, msgChannel)
+
 	return sub
+}
+
+func parseReceivedData(dbConnection *gorm.DB, msgChannel chan []byte) {
+	for {
+		order := models.Order{}
+		err := json.Unmarshal(<-msgChannel, &order)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable unmarshal data from Nats: %v\n", err)
+		} else {
+			order.Create(dbConnection)
+		}
+	}
 }

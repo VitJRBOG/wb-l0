@@ -32,10 +32,9 @@ func (order *Order) Create(dbConnection *gorm.DB) {
 	}
 }
 
-func (order *Order) Select(dbConnection *gorm.DB, id string) {
+func (order *Order) Select(dbConnection *gorm.DB, id string) error {
 	order.OrderUID = id
 	err := dbConnection.Preload(clause.Associations).First(&order).Error
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable pull data from db: %v\n", err)
-	}
+
+	return err
 }

@@ -7,6 +7,24 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type ServerConfig struct {
+	ServerPort string
+}
+
+func GetServerConfig() *ServerConfig {
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "GetServerConfig godotenv load failed: %v\n", err.Error())
+		os.Exit(1)
+	}
+
+	cfg := &ServerConfig{
+		os.Getenv("SERVER_PORT"),
+	}
+
+	return cfg
+}
+
 type DBConfig struct {
 	PostgresUser     string
 	PostgresPassword string

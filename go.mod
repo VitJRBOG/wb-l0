@@ -3,6 +3,7 @@ module wb-l0
 go 1.18
 
 require (
+	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.4.0
 	github.com/nats-io/stan.go v0.10.3
 	gorm.io/driver/postgres v1.3.8
