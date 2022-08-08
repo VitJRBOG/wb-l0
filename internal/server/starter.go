@@ -6,13 +6,13 @@ import (
 	"os"
 	"wb-l0/config"
 
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func Run(serverCfg *config.ServerConfig, dbConnection *gorm.DB) {
+func Run(serverCfg *config.ServerConfig, redisClient *redis.Client) {
 	rtr := mux.NewRouter()
-	handling(rtr, dbConnection)
+	handling(rtr, redisClient)
 
 	http.Handle("/", rtr)
 	err := http.ListenAndServe(fmt.Sprintf(":%s", serverCfg.ServerPort), nil)

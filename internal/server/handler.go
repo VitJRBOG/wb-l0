@@ -3,11 +3,11 @@ package server
 import (
 	"net/http"
 
+	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
-	"gorm.io/gorm"
 )
 
-func handling(rtr *mux.Router, dbConnection *gorm.DB) {
+func handling(rtr *mux.Router, redisClient *redis.Client) {
 	rtr.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		text := "Hello world"
 		_, err := w.Write([]byte(text))
@@ -18,7 +18,7 @@ func handling(rtr *mux.Router, dbConnection *gorm.DB) {
 
 	rtr.HandleFunc("/order/{order_uid:[a-zA-Z0-9]+}", func(w http.ResponseWriter, r *http.Request) {
 		orderUID := mux.Vars(r)["order_uid"]
-		orderJSON, err := order(dbConnection, orderUID)
+		orderJSON, err := order(redisClient, orderUID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

@@ -6,6 +6,7 @@ import (
 	"wb-l0/config"
 	"wb-l0/internal/db"
 	"wb-l0/internal/nats"
+	"wb-l0/internal/redis"
 	"wb-l0/internal/server"
 )
 
@@ -15,12 +16,16 @@ func Execute() {
 		dbCfg.DBHost, dbCfg.PostgresUser, dbCfg.PostgresPassword, dbCfg.DBHostPort, dbCfg.DBName)
 	dbConnection := db.NewConnection(databaseURL)
 
+	redisCfg := config.GetRedisConfig()
+	redisClient := redis.NewRedisClient(redisCfg)
+	redis.RestoreFromDB(redisClient, dbConnection)
+
 	natsCfg := config.GetNatsConfig()
 	sc := nats.Connect(natsCfg)
-	sub := nats.Subcribe(sc, dbConnection)
+	sub := nats.Subcribe(sc, dbConnection, redisClient)
 
 	serverCfg := config.GetServerConfig()
-	server.Run(serverCfg, dbConnection)
+	server.Run(serverCfg, redisClient)
 
 	defer sub.Unsubscribe()
 	defer sc.Close()

@@ -2,19 +2,17 @@ package server
 
 import (
 	"encoding/json"
-	"wb-l0/internal/models"
 
-	"gorm.io/gorm"
+	"github.com/go-redis/redis"
 )
 
-func order(dbConnection *gorm.DB, orderUID string) ([]byte, error) {
-	order := models.Order{}
-	err := order.Select(dbConnection, orderUID)
+func order(redisClient *redis.Client, orderUID string) ([]byte, error) {
+	result, err := redisClient.Get(orderUID).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	orderJSON, err := json.Marshal(order)
+	orderJSON, err := json.Marshal(result)
 	if err != nil {
 		return nil, err
 	}

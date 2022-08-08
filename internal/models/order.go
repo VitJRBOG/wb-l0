@@ -38,3 +38,10 @@ func (order *Order) Select(dbConnection *gorm.DB, id string) error {
 
 	return err
 }
+
+func SelectAllOrders(dbConnection *gorm.DB) ([]Order, error) {
+	orders := []Order{}
+	err := dbConnection.Preload(clause.Associations).Find(&orders).Error
+
+	return orders, err
+}

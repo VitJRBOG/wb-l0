@@ -76,3 +76,23 @@ func GetNatsConfig() *NatsConfig {
 
 	return cfg
 }
+
+type RedisConfig struct {
+	Host     string
+	HostPort string
+}
+
+func GetRedisConfig() *RedisConfig {
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "GetRedisConfig godotenv load failed: %v\n", err.Error())
+		os.Exit(1)
+	}
+
+	cfg := &RedisConfig{
+		os.Getenv("REDIS_HOST"),
+		os.Getenv("REDIS_HOST_PORT"),
+	}
+
+	return cfg
+}
