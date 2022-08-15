@@ -41,9 +41,8 @@ func Subcribe(sc stan.Conn, dbConnection *gorm.DB, redisClient *redis.Client) st
 	return sub
 }
 
-func parseReceivedData(dbConnection *gorm.DB, redisClient *redis.Client, msgChannel chan []byte) {
-	for {
-		rawData := <-msgChannel
+func parseReceivedData(dbConnection *gorm.DB, redisClient *redis.Client, msgChannel <-chan []byte) {
+	for rawData := range msgChannel {
 
 		order := models.Order{}
 		err := json.Unmarshal(rawData, &order)
